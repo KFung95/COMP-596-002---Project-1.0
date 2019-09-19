@@ -2,6 +2,7 @@ import arcade
 import pathlib
 from enum import auto, Enum
 
+
 class MoveEnum(Enum):
     NONE = auto()
     UP = auto()
@@ -11,35 +12,33 @@ class MoveEnum(Enum):
 
 
 class MinimalSprite(arcade.Sprite):
-    def __init__(self, ship_path: str, speed:int, game_window):
+    def __init__(self, ship_path: str, speed: int, game_window):
         super().__init__(ship_path)
         self.speed = speed
         self.game = game_window
 
-
-    def move(self, direction:MoveEnum):
-        #as a class exercise, lets fix this so it doesn't go off the window
+    def move(self, direction: MoveEnum):
+        # as a class exercise, lets fix this so it doesn't go off the window
         if direction == MoveEnum.UP:
             self.center_y += self.speed
         elif direction == MoveEnum.DOWN:
             self.center_y -= self.speed
         elif direction == MoveEnum.LEFT:
-            self.center_x -=self.speed
+            self.center_x -= self.speed
         elif direction == MoveEnum.RIGHT:
             self.center_x += self.speed
-        else: #should be MoveEnum.NONE
+        else:  # should be MoveEnum.NONE
             pass
 
 
 class MimimalArcade(arcade.Window):
 
-    def __init__(self, image_name:str, screen_w:int = 1024, screen_h:int =1024):
+    def __init__(self, image_name: str, screen_w: int = 1024, screen_h: int = 1024):
         super().__init__(screen_w, screen_h)
         self.image_path = pathlib.Path.cwd() / 'Assets' / image_name
         self.pict = None
         self.direction = MoveEnum.NONE
         self.pictlist = None
-
 
     def setup(self):
         self.pict = MinimalSprite(str(self.image_path), speed=3, game_window=self)
@@ -49,8 +48,8 @@ class MimimalArcade(arcade.Window):
         self.pictlist.append(self.pict)
 
     def on_update(self, delta_time: float):
-        #to get really smooth movement we would use the delta time to
-        #adjust the movement, but for this simple version I'll forgo that.
+        # to get really smooth movement we would use the delta time to
+        # adjust the movement, but for this simple version I'll forgo that.
         self.pict.move(self.direction)
 
     def on_draw(self):
@@ -85,13 +84,13 @@ class MimimalArcade(arcade.Window):
                 self.direction == MoveEnum.RIGHT:
             self.direction = MoveEnum.NONE
 
+
 def main():
     """ Main method """
     window = MimimalArcade("PlayerShip.png", screen_w=1080)
     window.setup()
     arcade.run()
 
+
 if __name__ == '__main__':
     main()
-
-
