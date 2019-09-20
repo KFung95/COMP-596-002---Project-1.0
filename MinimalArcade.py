@@ -19,13 +19,13 @@ class MinimalSprite(arcade.Sprite):
 
     def move(self, direction: MoveEnum):
         # as a class exercise, lets fix this so it doesn't go off the window
-        if direction == MoveEnum.UP:
+        if direction == MoveEnum.UP and self.center_y < 1024:
             self.center_y += self.speed
-        elif direction == MoveEnum.DOWN:
+        elif direction == MoveEnum.DOWN and self.center_y > 0:
             self.center_y -= self.speed
-        elif direction == MoveEnum.LEFT:
+        elif direction == MoveEnum.LEFT and self.center_x > 0:
             self.center_x -= self.speed
-        elif direction == MoveEnum.RIGHT:
+        elif direction == MoveEnum.RIGHT and self.center_x < 1024:
             self.center_x += self.speed
         else:  # should be MoveEnum.NONE
             pass
@@ -33,19 +33,28 @@ class MinimalSprite(arcade.Sprite):
 
 class MimimalArcade(arcade.Window):
 
-    def __init__(self, image_name: str, screen_w: int = 1024, screen_h: int = 1024):
+    def __init__(self, image_name: str, back_image: str, sound: str, screen_w: int = 1024, screen_h: int = 1024):
         super().__init__(screen_w, screen_h)
         self.image_path = pathlib.Path.cwd() / 'Assets' / image_name
+        self.image_back = pathlib.Path.cwd() / 'Assets' / back_image
+        self.shot_sound = arcade.load_sound(str(pathlib.Path.cwd() / 'Assets' / sound))
         self.pict = None
         self.direction = MoveEnum.NONE
         self.pictlist = None
+        self.wall_list = None
 
     def setup(self):
         self.pict = MinimalSprite(str(self.image_path), speed=3, game_window=self)
         self.pict.center_x = 500
         self.pict.center_y = 500
         self.pictlist = arcade.SpriteList()
+        self.wall_list = arcade.SpriteList()
         self.pictlist.append(self.pict)
+
+        wall = arcade.Sprite(str(self.image_back), 5)
+        wall.center_x = 240
+        wall.center_y = 490
+        self.wall_list.append(wall)
 
     def on_update(self, delta_time: float):
         # to get really smooth movement we would use the delta time to
@@ -56,10 +65,14 @@ class MimimalArcade(arcade.Window):
         """ Render the screen. """
         arcade.start_render()
         # Code to draw the screen goes here
+        self.wall_list.draw()
         self.pictlist.draw()
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
+        if key == arcade.key.SPACE:
+            arcade.play_sound(self.shot_sound)
+
         if key == arcade.key.UP or key == arcade.key.W:
             self.direction = MoveEnum.UP
         elif key == arcade.key.DOWN or key == arcade.key.S:
@@ -87,7 +100,7 @@ class MimimalArcade(arcade.Window):
 
 def main():
     """ Main method """
-    window = MimimalArcade("PlayerShip.png", screen_w=1080)
+    window = MimimalArcade("PlayerShip.png", "Ocean.png", "dart.wav", screen_w=1080)
     window.setup()
     arcade.run()
 
