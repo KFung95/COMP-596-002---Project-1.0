@@ -118,7 +118,7 @@ class MimimalArcade(arcade.Window):
 
 def main():
     """ Main method """
-    window = MimimalArcade("PlayerShip.png", "Ocean.png", "laser4_0.wav", "Shot.png", screen_w=1080)
+    window = MimimalArcade("Ship2.png", "Ocean.png", "laser4_0.wav", "Shot.png", screen_w=1080)
     window.setup()
     arcade.run()
 
