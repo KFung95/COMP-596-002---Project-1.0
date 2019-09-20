@@ -11,7 +11,7 @@ class MoveEnum(Enum):
     RIGHT = auto()
 
 
-class MinimalSprite(arcade.Sprite):
+class Ship(arcade.Sprite):
     def __init__(self, ship_path: str, speed: int, game_window):
         super().__init__(ship_path)
         self.speed = speed
@@ -19,58 +19,76 @@ class MinimalSprite(arcade.Sprite):
 
     def move(self, direction: MoveEnum):
         # as a class exercise, lets fix this so it doesn't go off the window
-        if direction == MoveEnum.UP and self.center_y < 1024:
+        if direction == MoveEnum.UP and self.center_y < 990:
             self.center_y += self.speed
-        elif direction == MoveEnum.DOWN and self.center_y > 0:
+        elif direction == MoveEnum.DOWN and self.center_y > 30:
             self.center_y -= self.speed
-        elif direction == MoveEnum.LEFT and self.center_x > 0:
+        elif direction == MoveEnum.LEFT and self.center_x > 35:
             self.center_x -= self.speed
-        elif direction == MoveEnum.RIGHT and self.center_x < 1024:
+        elif direction == MoveEnum.RIGHT and self.center_x < 1048:
             self.center_x += self.speed
         else:  # should be MoveEnum.NONE
             pass
 
 
-class MimimalArcade(arcade.Window):
+class Bullet(arcade.Sprite):
+    def __init__(self, bullet_path: str, game_window):
+        super().__init__(bullet_path)
+        self.game = game_window
 
-    def __init__(self, image_name: str, back_image: str, sound: str, screen_w: int = 1024, screen_h: int = 1024):
+
+class MimimalArcade(arcade.Window):
+    def __init__(self, image_name: str, back_image: str, sound: str, shot: str, screen_w: int = 1024,
+                 screen_h: int = 1024):
         super().__init__(screen_w, screen_h)
+        self.will_shoot = False
         self.image_path = pathlib.Path.cwd() / 'Assets' / image_name
         self.image_back = pathlib.Path.cwd() / 'Assets' / back_image
+        self.image_shot = pathlib.Path.cwd() / 'Assets' / shot
         self.shot_sound = arcade.load_sound(str(pathlib.Path.cwd() / 'Assets' / sound))
         self.pict = None
+        self.shot = None
         self.direction = MoveEnum.NONE
         self.pictlist = None
-        self.wall_list = None
+        self.walllist = None
+        self.shotlist = None
 
     def setup(self):
-        self.pict = MinimalSprite(str(self.image_path), speed=3, game_window=self)
+        self.pict = Ship(str(self.image_path), speed=8, game_window=self)
+        self.shot = Bullet(str(self.image_shot), game_window=self)
         self.pict.center_x = 500
         self.pict.center_y = 500
         self.pictlist = arcade.SpriteList()
-        self.wall_list = arcade.SpriteList()
+        self.walllist = arcade.SpriteList()
+        self.shotlist = arcade.SpriteList()
         self.pictlist.append(self.pict)
 
         wall = arcade.Sprite(str(self.image_back), 5)
         wall.center_x = 240
         wall.center_y = 490
-        self.wall_list.append(wall)
+        self.walllist.append(wall)
 
     def on_update(self, delta_time: float):
         # to get really smooth movement we would use the delta time to
         # adjust the movement, but for this simple version I'll forgo that.
         self.pict.move(self.direction)
+        self.shotlist.move(20, 0)
 
     def on_draw(self):
         """ Render the screen. """
         arcade.start_render()
         # Code to draw the screen goes here
-        self.wall_list.draw()
+        self.walllist.draw()
         self.pictlist.draw()
+        self.shotlist.draw()
 
     def on_key_press(self, key, modifiers):
         """Called whenever a key is pressed. """
         if key == arcade.key.SPACE:
+            self.shot = Bullet(str(self.image_shot), game_window=self)
+            self.shot.center_x = self.pict.center_x
+            self.shot.center_y = self.pict.center_y
+            self.shotlist.append(self.shot)
             arcade.play_sound(self.shot_sound)
 
         if key == arcade.key.UP or key == arcade.key.W:
@@ -100,7 +118,7 @@ class MimimalArcade(arcade.Window):
 
 def main():
     """ Main method """
-    window = MimimalArcade("PlayerShip.png", "Ocean.png", "dart.wav", screen_w=1080)
+    window = MimimalArcade("PlayerShip.png", "Ocean.png", "dart.wav", "Shot.png", screen_w=1080)
     window.setup()
     arcade.run()
 
