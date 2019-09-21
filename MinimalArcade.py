@@ -46,31 +46,38 @@ class MimimalArcade(arcade.Window):
         self.image_back = pathlib.Path.cwd() / 'Assets' / back_image
         self.image_shot = pathlib.Path.cwd() / 'Assets' / shot
         self.shot_sound = arcade.load_sound(str(pathlib.Path.cwd() / 'Assets' / sound))
+
         self.pict = None
+        self.wall = None
         self.shot = None
-        self.direction = MoveEnum.NONE
+
         self.pictlist = None
         self.walllist = None
         self.shotlist = None
 
+        self.direction = MoveEnum.NONE
+
     def setup(self):
         self.pict = Ship(str(self.image_path), speed=8, game_window=self)
+        self.wall = arcade.Sprite(str(self.image_back), 5)
         self.shot = Bullet(str(self.image_shot), game_window=self)
-        self.pict.center_x = 500
-        self.pict.center_y = 500
+
         self.pictlist = arcade.SpriteList()
         self.walllist = arcade.SpriteList()
         self.shotlist = arcade.SpriteList()
+
+        self.pict.center_x = 500
+        self.pict.center_y = 500
         self.pictlist.append(self.pict)
 
-        wall = arcade.Sprite(str(self.image_back), 5)
-        wall.center_x = 240
-        wall.center_y = 490
-        self.walllist.append(wall)
+        self.wall.center_x = 240
+        self.wall.center_y = 490
+        self.walllist.append(self.wall)
 
     def on_update(self, delta_time: float):
         # to get really smooth movement we would use the delta time to
         # adjust the movement, but for this simple version I'll forgo that.
+        self.walllist.move(-5, 0)
         self.pict.move(self.direction)
         self.shotlist.move(20, 0)
 
