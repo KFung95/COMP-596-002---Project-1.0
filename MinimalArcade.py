@@ -37,6 +37,15 @@ class Bullet(arcade.Sprite):
         self.game = game_window
 
 
+class Wall(arcade.Sprite):
+    def __init__(self, bullet_path: str, game_window):
+        super().__init__(bullet_path)
+        self.game = game_window
+
+    def move(self):
+        self.center_x -= 5
+
+
 class MimimalArcade(arcade.Window):
     def __init__(self, image_name: str, back_image: str, sound: str, shot: str, screen_w: int = 1024,
                  screen_h: int = 1024):
