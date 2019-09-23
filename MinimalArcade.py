@@ -79,14 +79,20 @@ class MimimalArcade(arcade.Window):
         self.pict.center_y = 500
         self.pictlist.append(self.pict)
 
-        self.wall.center_x = 240
-        self.wall.center_y = 490
+        self.wall.center_x = 1200
+        self.wall.center_y = 512
         self.walllist.append(self.wall)
 
     def on_update(self, delta_time: float):
         # to get really smooth movement we would use the delta time to
         # adjust the movement, but for this simple version I'll forgo that.
         self.walllist.move(-5, 0)
+        self.wall.boundary_right = -120
+        if self.wall.center_x < self.wall.boundary_right:
+            self.wall = arcade.Sprite(str(self.image_back), 5)
+            self.wall.center_x = 2275
+            self.wall.center_y = 512
+            self.walllist.append(self.wall)
         self.pict.move(self.direction)
         self.shotlist.move(20, 0)
 
