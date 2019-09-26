@@ -1,5 +1,7 @@
 import arcade
 import pathlib
+import time
+import random
 from enum import auto, Enum
 
 
@@ -37,43 +39,58 @@ class Bullet(arcade.Sprite):
         self.game = game_window
 
 
-class Wall(arcade.Sprite):
-    def __init__(self, bullet_path: str, game_window):
-        super().__init__(bullet_path)
+class Enemy(arcade.Sprite):
+    def __init__(self, enemy_path: str, game_window):
+        super().__init__(enemy_path)
         self.game = game_window
-
-    def move(self):
-        self.center_x -= 5
 
 
 class MimimalArcade(arcade.Window):
-    def __init__(self, image_name: str, back_image: str, sound: str, shot: str, screen_w: int = 1024,
-                 screen_h: int = 1024):
+    def __init__(self, image_name: str, back_image: str, sound: str, shot: str, enemy: str,
+                 enemy2: str, screen_w: int = 1024, screen_h: int = 1024):
         super().__init__(screen_w, screen_h)
-        self.will_shoot = False
+        self.current_time = time.time()
+        self.escalation_time = time.time() + 10
+        self.can_shoot = 0
+        self.can_spawn = time.time()
+        self.can_spawn_2 = time.time()
+        self.time_delay = random.randint(1, 10)
+        self.time_delay_2 = random.randint(1, 10)
+        self.random_y = random.randint(28, 996)
+        self.score = 0
         self.image_path = pathlib.Path.cwd() / 'Assets' / image_name
+        self.image_enemy = pathlib.Path.cwd() / 'Assets' / enemy
+        self.image_enemy_2 = pathlib.Path.cwd() / 'Assets' / enemy2
         self.image_back = pathlib.Path.cwd() / 'Assets' / back_image
         self.image_shot = pathlib.Path.cwd() / 'Assets' / shot
         self.shot_sound = arcade.load_sound(str(pathlib.Path.cwd() / 'Assets' / sound))
 
         self.pict = None
         self.wall = None
+        self.wall_2 = None
+        self.tracker = 0
+        self.image_move_speed = -5
         self.shot = None
+        self.e1 = None
+        self.e2 = None
 
         self.pictlist = None
         self.walllist = None
         self.shotlist = None
+        self.enemylist = None
 
         self.direction = MoveEnum.NONE
 
     def setup(self):
         self.pict = Ship(str(self.image_path), speed=8, game_window=self)
         self.wall = arcade.Sprite(str(self.image_back), 5)
+        self.wall_2 = arcade.Sprite(str(self.image_back), 5)
         self.shot = Bullet(str(self.image_shot), game_window=self)
 
         self.pictlist = arcade.SpriteList()
         self.walllist = arcade.SpriteList()
         self.shotlist = arcade.SpriteList()
+        self.enemylist = arcade.SpriteList()
 
         self.pict.center_x = 500
         self.pict.center_y = 500
@@ -81,18 +98,58 @@ class MimimalArcade(arcade.Window):
 
         self.wall.center_x = 1200
         self.wall.center_y = 512
+        self.wall_2.center_x = -1440
+        self.wall_2.center_y = 512
         self.walllist.append(self.wall)
+        self.walllist.append(self.wall_2)
 
     def on_update(self, delta_time: float):
         # to get really smooth movement we would use the delta time to
         # adjust the movement, but for this simple version I'll forgo that.
-        self.walllist.move(-5, 0)
+        self.current_time = time.time()
+
+        if self.can_spawn + self.time_delay < self.current_time:
+            self.e1 = Enemy(str(self.image_enemy), game_window=self)
+            self.e1.center_x = 1036
+            self.random_y = random.randint(28, 996)
+            self.e1.center_y = self.random_y
+            self.enemylist.append(self.e1)
+            self.can_spawn = time.time()
+            self.time_delay = random.randint(1, 10)
+
+        collisions = [col_ship for col_ship in self.enemylist if
+                      arcade.check_for_collision_with_list(col_ship, self.shotlist)]
+        if collisions:
+            self.score += 1
+            '''
+            # enemy dies
+            if self.score >= 60:
+                # end game
+            '''
+
+        if self.escalation_time < self.current_time:
+            self.image_move_speed = -8
+            if self.can_spawn_2 + self.time_delay_2 < self.current_time:
+                self.e2 = Enemy(str(self.image_enemy_2), game_window=self)
+                self.e2.center_x = 1036
+                self.random_y = random.randint(28, 996)
+                self.e2.center_y = self.random_y
+                self.enemylist.append(self.e2)
+                self.can_spawn_2 = time.time()
+                self.time_delay_2 = random.randint(1, 10)
+
+        self.walllist.move(self.image_move_speed, 0)
         self.wall.boundary_right = -120
-        if self.wall.center_x < self.wall.boundary_right:
-            self.wall = arcade.Sprite(str(self.image_back), 5)
+        self.wall_2.boundary_right = -120
+        if self.wall.center_x < self.wall.boundary_right and self.tracker == 0:
+            self.wall_2.center_x = 2275
+            self.wall_2.center_y = 512
+            self.tracker = 1
+        elif self.wall_2.center_x < self.wall_2.boundary_right and self.tracker == 1:
             self.wall.center_x = 2275
             self.wall.center_y = 512
-            self.walllist.append(self.wall)
+            self.tracker = 0
+
         self.pict.move(self.direction)
         self.shotlist.move(20, 0)
 
@@ -103,10 +160,16 @@ class MimimalArcade(arcade.Window):
         self.walllist.draw()
         self.pictlist.draw()
         self.shotlist.draw()
+        self.enemylist.draw()
 
-    def on_key_press(self, key, modifiers):
+        # Source: http://arcade.academy/examples/sprite_collect_coins_with_stats.html?highlight=display%20text
+        output = f"Score: {self.score}"
+        arcade.draw_text(output, 10, 20, arcade.color.WHITE, 30)
+
+    def on_key_press(self, key, xmodifiers):
         """Called whenever a key is pressed. """
-        if key == arcade.key.SPACE:
+        if key == arcade.key.SPACE and self.current_time > self.can_shoot:
+            self.can_shoot = self.current_time + 1
             self.shot = Bullet(str(self.image_shot), game_window=self)
             self.shot.center_x = self.pict.center_x
             self.shot.center_y = self.pict.center_y
@@ -140,7 +203,8 @@ class MimimalArcade(arcade.Window):
 
 def main():
     """ Main method """
-    window = MimimalArcade("Ship2.png", "Ocean.png", "laser4_0.wav", "Shot.png", screen_w=1080)
+    window = MimimalArcade("Ship2.png", "Ocean.png", "laser4_0.wav", "Shot.png", "Enemy.png",
+                           "Enemy2.png", screen_w=1080)
     window.setup()
     arcade.run()
 
