@@ -40,9 +40,10 @@ class Bullet(arcade.Sprite):
 
 
 class Enemy(arcade.Sprite):
-    def __init__(self, enemy_path: str, game_window):
+    def __init__(self, enemy_path: str, health: int, game_window):
         super().__init__(enemy_path)
         self.game = game_window
+        self.health = health
 
 
 class MimimalArcade(arcade.Window):
@@ -50,7 +51,7 @@ class MimimalArcade(arcade.Window):
                  enemy2: str, screen_w: int = 1024, screen_h: int = 1024):
         super().__init__(screen_w, screen_h)
         self.current_time = time.time()
-        self.escalation_time = time.time() + 10
+        self.escalation_time = time.time() + 20
         self.can_shoot = 0
         self.can_spawn = time.time()
         self.can_spawn_2 = time.time()
@@ -71,8 +72,8 @@ class MimimalArcade(arcade.Window):
         self.tracker = 0
         self.image_move_speed = -5
         self.shot = None
-        self.e1 = None
-        self.e2 = None
+        self.e_1 = None
+        self.e_2 = None
 
         self.pictlist = None
         self.walllist = None
@@ -109,16 +110,19 @@ class MimimalArcade(arcade.Window):
         self.current_time = time.time()
 
         if self.can_spawn + self.time_delay < self.current_time:
-            self.e1 = Enemy(str(self.image_enemy), game_window=self)
-            self.e1.center_x = 1036
+            self.e_1 = Enemy(str(self.image_enemy), 1, game_window=self)
+            self.e_1.center_x = 1150
             self.random_y = random.randint(28, 996)
-            self.e1.center_y = self.random_y
-            self.enemylist.append(self.e1)
+            self.e_1.center_y = self.random_y
+            self.enemylist.append(self.e_1)
             self.can_spawn = time.time()
             self.time_delay = random.randint(1, 10)
 
         collisions = [col_ship for col_ship in self.enemylist if
                       arcade.check_for_collision_with_list(col_ship, self.shotlist)]
+
+        gameover = [col_ship for col_ship in self.enemylist if
+                      arcade.check_for_collision_with_list(col_ship, self.pictlist)]
         if collisions:
             self.score += 1
             '''
@@ -126,15 +130,17 @@ class MimimalArcade(arcade.Window):
             if self.score >= 60:
                 # end game
             '''
+        if gameover:
+            print('game over')
 
         if self.escalation_time < self.current_time:
             self.image_move_speed = -8
             if self.can_spawn_2 + self.time_delay_2 < self.current_time:
-                self.e2 = Enemy(str(self.image_enemy_2), game_window=self)
-                self.e2.center_x = 1036
+                self.e_2 = Enemy(str(self.image_enemy_2), 2, game_window=self)
+                self.e_2.center_x = 1150
                 self.random_y = random.randint(28, 996)
-                self.e2.center_y = self.random_y
-                self.enemylist.append(self.e2)
+                self.e_2.center_y = self.random_y
+                self.enemylist.append(self.e_2)
                 self.can_spawn_2 = time.time()
                 self.time_delay_2 = random.randint(1, 10)
 
@@ -152,6 +158,7 @@ class MimimalArcade(arcade.Window):
 
         self.pict.move(self.direction)
         self.shotlist.move(20, 0)
+        self.enemylist.move(-5, 0)
 
     def on_draw(self):
         """ Render the screen. """
@@ -163,7 +170,7 @@ class MimimalArcade(arcade.Window):
         self.enemylist.draw()
 
         # Source: http://arcade.academy/examples/sprite_collect_coins_with_stats.html?highlight=display%20text
-        output = f"Score: {self.score}"
+        output = f"Seagulls Feed: {self.score}"
         arcade.draw_text(output, 10, 20, arcade.color.WHITE, 30)
 
     def on_key_press(self, key, xmodifiers):
@@ -203,8 +210,8 @@ class MimimalArcade(arcade.Window):
 
 def main():
     """ Main method """
-    window = MimimalArcade("Ship2.png", "Ocean.png", "laser4_0.wav", "Shot.png", "Enemy.png",
-                           "Enemy2.png", screen_w=1080)
+    window = MimimalArcade("Chef.png", "Ocean.png", "bop.wav", "Baguette.png", "Seagull.png",
+                           "Seagull_2.png", screen_w=1080)
     window.setup()
     arcade.run()
 
