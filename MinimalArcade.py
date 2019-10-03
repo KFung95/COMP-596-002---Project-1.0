@@ -118,20 +118,36 @@ class MimimalArcade(arcade.Window):
             self.can_spawn = time.time()
             self.time_delay = random.randint(1, 10)
 
-        collisions = [col_ship for col_ship in self.enemylist if
-                      arcade.check_for_collision_with_list(col_ship, self.shotlist)]
+        for enemy in self.enemylist:
+            if random.randrange(0, 200) == 60:
+                print('shoot')
+
+        seagull_collisions = [col_seagull for col_seagull in self.enemylist if
+                              arcade.check_for_collision_with_list(col_seagull, self.shotlist)]
+
+        bullet_collusion = [col_bullet for col_bullet in self.shotlist if
+                            arcade.check_for_collision_with_list(col_bullet, self.enemylist)]
+
+        if seagull_collisions:
+            go_away = filter(lambda seagull: seagull in seagull_collisions, self.enemylist)
+            for seagull in go_away:
+                seagull.health -= 1
+                if seagull.health == 0:
+                    self.enemylist.remove(seagull)
+                    self.score += 1
+
+        if bullet_collusion:
+            go_away_bullet = filter(lambda bullet: bullet in bullet_collusion, self.shotlist)
+            for bullet in go_away_bullet:
+                self.shotlist.remove(bullet)
+
+        if self.score >= 60:
+            print('game over, score met')
 
         gameover = [col_ship for col_ship in self.enemylist if
-                      arcade.check_for_collision_with_list(col_ship, self.pictlist)]
-        if collisions:
-            self.score += 1
-            '''
-            # enemy dies
-            if self.score >= 60:
-                # end game
-            '''
+                    arcade.check_for_collision_with_list(col_ship, self.pictlist)]
         if gameover:
-            print('game over')
+            print('game over, chef died')
 
         if self.escalation_time < self.current_time:
             self.image_move_speed = -8
@@ -158,7 +174,7 @@ class MimimalArcade(arcade.Window):
 
         self.pict.move(self.direction)
         self.shotlist.move(20, 0)
-        self.enemylist.move(-5, 0)
+        self.enemylist.move(-2, 0)
 
     def on_draw(self):
         """ Render the screen. """
