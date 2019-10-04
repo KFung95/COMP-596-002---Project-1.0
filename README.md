@@ -20,5 +20,7 @@
 
 # Credits
 * Ocean.png - KnoblePersona from OpenGameArt.com
-* Laser4_0.wav - dklon from OpenGameArt.com
-* Ship2.png - Stephen Challener (Redshrike) from OpenGameArt.com
+* defeat.wav - CleytonKauffman from OpenGameArt.com
+* Victory.wav - celestialghost8 from OpenGameArt.com
+* Chef.png - Original is from Umz from OpenGameArt.com
+* All other assets were created by myself
