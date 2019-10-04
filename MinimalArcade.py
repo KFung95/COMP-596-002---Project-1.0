@@ -48,7 +48,8 @@ class Enemy(arcade.Sprite):
 
 
 class MimimalArcade(arcade.Window):
-    def __init__(self, image_name: str, back_image: str, sound: str, enemy_sound: str, chef_sound: str, munch: str, victory: str, defeat: str, shot: str, enemy: str,
+    def __init__(self, image_name: str, back_image: str, sound: str, enemy_sound: str, chef_sound: str,
+                 munch: str, victory: str, defeat: str, shot: str, enemy: str,
                  enemy2: str, enemy2_v2: str, enemy_shot: str, screen_w: int = 1024, screen_h: int = 1024):
         super().__init__(screen_w, screen_h)
         self.score = None
@@ -150,7 +151,7 @@ class MimimalArcade(arcade.Window):
             self.e_1.center_y = self.random_y
             self.enemy_list.append(self.e_1)
             self.can_spawn = time.time()
-            self.time_delay = random.randint(1, 10)
+            self.time_delay = random.randint(1, 8)
 
         # Random enemy shots
         for enemy in self.enemy_list:
@@ -262,7 +263,8 @@ class MimimalArcade(arcade.Window):
         if self.kills >= 60:
             self.win = True
 
-        # Escalation occurs after 20 seconds pass and increases background + enemy movement speed and spawn rates
+        # Escalation occurs after 20 seconds pass and increases background +
+        # enemy movement speed and spawn rates
         if self.escalation_time < self.current_time:
             self.image_move_speed = -8
             self.enemy_movement_speed = -4
@@ -334,13 +336,14 @@ class MimimalArcade(arcade.Window):
         output = f"Score: {self.score}"
         arcade.draw_text(output, 10, 60, arcade.color.WHITE, 30)
 
-
         if self.lose:
             arcade.draw_text("Game Over", 256, 700, arcade.color.WHITE, 100)
-            arcade.draw_text('Hit \'Y\' to restart or \'N\' to close', 350, 600, arcade.color.WHITE, 24)
+            arcade.draw_text('Hit \'Y\' to restart or \'N\' to close',
+                             350, 600, arcade.color.WHITE, 24)
         elif self.win:
             arcade.draw_text("You won!", 300, 700, arcade.color.WHITE, 100)
-            arcade.draw_text('Hit \'Y\' to restart or \'N\' to close', 350, 600, arcade.color.WHITE, 24)
+            arcade.draw_text('Hit \'Y\' to restart or \'N\' to close',
+                             350, 600, arcade.color.WHITE, 24)
 
     def on_key_press(self, key, xmodifiers):
         if self.lose or self.win:
@@ -385,7 +388,8 @@ class MimimalArcade(arcade.Window):
 
 def main():
     """ Main method """
-    window = MimimalArcade("Chef.png", "Ocean.png", "bop.wav", "spit.wav", "chef_hit.wav", "munch.wav", "Victory.wav", "defeat.wav", "Baguette.png", "Seagull.png",
+    window = MimimalArcade("Chef.png", "Ocean.png", "bop.wav", "spit.wav", "chef_hit.wav", "munch.wav",
+                           "Victory.wav", "defeat.wav", "Baguette.png", "Seagull.png",
                            "Seagull_2.png", "Seagull_2_low_HP.png", "Shot.png", screen_w=1080)
     window.setup()
     arcade.run()
